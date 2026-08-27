@@ -1,0 +1,22 @@
+name: Feature request
+description: Propose a new feature to be developed via the SDD workflow
+labels: ["feature"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What's broken or missing?
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: Success criteria
+      description: How will we know this is done?
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        Once triaged, this becomes `specs/<slug>/00-intent.md` via `/specify`.

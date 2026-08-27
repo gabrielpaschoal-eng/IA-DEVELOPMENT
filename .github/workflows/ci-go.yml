@@ -1,0 +1,41 @@
+name: CI - Go
+
+on:
+  pull_request:
+    paths:
+      - "apps/**/*.go"
+      - "apps/**/go.mod"
+      - "templates/go-app/**"
+  workflow_dispatch:
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      dirs: ${{ steps.find.outputs.dirs }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        run: |
+          dirs=$(find apps templates/go-app -maxdepth 2 -name go.mod -printf '%h\n' 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "dirs=$dirs" >> "$GITHUB_OUTPUT"
+
+  lint-test:
+    needs: discover
+    if: needs.discover.outputs.dirs != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: ${{ fromJson(needs.discover.outputs.dirs) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ matrix.dir }}/go.mod
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          working-directory: ${{ matrix.dir }}
+      - name: Test
+        working-directory: ${{ matrix.dir }}
+        run: go test ./...

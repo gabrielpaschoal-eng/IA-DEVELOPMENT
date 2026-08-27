@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+
+# Go
+/bin/
+*.exe
+*.test
+*.out
+
+# Claude Code / Serena (local, machine-specific)
+.claude/settings.local.json
+.claude/state/
+.serena/
+
+# Editors / OS
+.idea/
+.DS_Store
+*.swp
+
+# Env
+.env
+.env.local

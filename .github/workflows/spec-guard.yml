@@ -1,0 +1,36 @@
+name: Spec Guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine exemption
+        id: exempt
+        env:
+          LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          reason=""
+          if echo "$LABELS" | grep -q "no-spec-needed"; then
+            reason="label:no-spec-needed"
+          fi
+          trailer=$(printf '%s' "$PR_BODY" | grep -oP '(?<=^Spec-Exempt: ).*' || true)
+          if [ -n "$trailer" ]; then
+            reason="trailer:$trailer"
+          fi
+          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+
+      - name: Run spec-guard
+        run: |
+          python3 scripts/check_spec_guard.py \
+            --base "origin/${{ github.event.pull_request.base.ref }}" \
+            --head "HEAD" \
+            --exempt "${{ steps.exempt.outputs.reason }}"

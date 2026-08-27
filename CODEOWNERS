@@ -1,0 +1,5 @@
+# Default owners for everything in the repo, unless a later, more specific
+# pattern matches. Fill in real GitHub usernames or team handles before
+# relying on this for branch protection / required reviews.
+#
+# * @your-org/your-team

@@ -1,0 +1,41 @@
+name: CI - Python
+
+on:
+  pull_request:
+    paths:
+      - "apps/**/*.py"
+      - "apps/**/pyproject.toml"
+      - "templates/python-app/**"
+  workflow_dispatch:
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      dirs: ${{ steps.find.outputs.dirs }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        run: |
+          dirs=$(find apps templates/python-app -maxdepth 2 -name pyproject.toml -printf '%h\n' 2>/dev/null | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "dirs=$dirs" >> "$GITHUB_OUTPUT"
+
+  lint-test:
+    needs: discover
+    if: needs.discover.outputs.dirs != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: ${{ fromJson(needs.discover.outputs.dirs) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - name: Install deps
+        working-directory: ${{ matrix.dir }}
+        run: uv sync --all-extras
+      - name: Ruff
+        working-directory: ${{ matrix.dir }}
+        run: uv run ruff check .
+      - name: Pytest
+        working-directory: ${{ matrix.dir }}
+        run: uv run pytest

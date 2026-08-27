@@ -1,0 +1,4 @@
+{
+  "_comment": "Copy to settings.local.json (gitignored) for personal overrides. E.g. temporarily disable a guardrail hook during an incident — do this explicitly and visibly, never silently. Example: set \"hooks\": {\"PreToolUse\": []} to disable all PreToolUse hooks locally.",
+  "hooks": {}
+}
